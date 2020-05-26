@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import "antd/dist/antd.css";
-import {BookTwoTone} from '@ant-design/icons';
-import { Tabs, Row, Col, Menu, List, Button } from 'antd';
+import { Tabs, Row, Col, Menu, List, Button, Card } from 'antd';
+import Loading from 'react-page-loading';
 import { useDispatch, useSelector } from 'react-redux';
 import {fetchBooks} from './features/books/actions';
 import {set_current_book} from './features/current_book';
 import {set_current_chapter} from './features/current_chapter';
 import { fetch_verses } from "./features/verses";
 import {fetchVerses} from './features/verses/actions';
+import {BookTwoTone} from '@ant-design/icons';
+import "antd/dist/antd.css";
 
 const {TabPane} = Tabs;
 
@@ -21,19 +22,25 @@ const App = () => {
   const [chapters,setChapters] = useState([]);
   const dispatch = useDispatch();
   const [key,setKey] = useState('1');
+  const [load, setLoad] = useState(false);
 
   const changeKey = (key) =>{
     setKey(key);
 
     if(key === '1'){
+      setLoad(true);
       dispatch(fetchBooks());
       dispatch(set_current_chapter(0));
       dispatch(set_current_book(null));
       dispatch(fetch_verses([]));
+      setTimeout(() => {
+        setLoad(false);
+      }, 500);
     }
   }
 
   const handleBook = (book) =>{
+    setLoad(true);
     var vetor = [];
     for (let index = 1; index <= book.chapters; index++) {
       vetor.push(index);
@@ -41,12 +48,20 @@ const App = () => {
     setChapters(vetor);
     dispatch(set_current_book(book));
     setKey('2');
+
+    setTimeout(() => {
+      setLoad(false);
+    }, 500);
   };
 
   const handleChapter = (chapter) =>{
+    setLoad(true);
     dispatch(set_current_chapter(chapter));
     handleVerse(current_book.abbrev.pt, chapter);
     setKey('3');
+    setTimeout(() => {
+      setLoad(false);
+    }, 500);
   };
 
   const handleVerse = (book, chapter) =>{
@@ -54,13 +69,20 @@ const App = () => {
   }
 
   useEffect(()=>{
+    setLoad(true);
     dispatch(fetchBooks());
+    setTimeout(() => {
+      setLoad(false);
+    }, 500);
   },[dispatch]);
 
   return (
     <div className="app">
       <Menu theme="dark" mode="horizontal">
-        <Menu.Item icon={<BookTwoTone size={24} />} onClick={()=> setKey('1')}>
+        <Menu.Item
+          icon={<BookTwoTone size={24} />}
+          onClick={() => changeKey("1")}
+        >
           Biblia Online
         </Menu.Item>
       </Menu>
@@ -69,25 +91,29 @@ const App = () => {
           <Tabs defaultActiveKey="1" activeKey={key} onChange={changeKey}>
             <TabPane tab="Livros" key="1">
               Livros
-              <Row justify="center">
-                <Col span="24" style={{ marginBottom: "200px" }}>
-                  <List
-                    bordered
-                    dataSource={livros.length ? livros : [{ name: "Gênises" }]}
-                    renderItem={(item) => (
-                      <List.Item style={{ padding: 0 }}>
-                        <Button
-                          type="primary"
-                          block
-                          onClick={() => handleBook(item)}
-                        >
-                          {item.name}
-                        </Button>
-                      </List.Item>
-                    )}
-                  />
-                </Col>
-              </Row>
+              <Card style={{ height: 1300 }} loading={load}>
+                <Row justify="center">
+                  <Col span="24" style={{ marginBottom: "200px" }}>
+                    <List
+                      bordered
+                      dataSource={
+                        livros.length ? livros : [{ name: "Gênises" }]
+                      }
+                      renderItem={(item) => (
+                        <List.Item style={{ padding: 0 }}>
+                          <Button
+                            type="primary"
+                            block
+                            onClick={() => handleBook(item)}
+                          >
+                            {item.name}
+                          </Button>
+                        </List.Item>
+                      )}
+                    />
+                  </Col>
+                </Row>
+              </Card>
             </TabPane>
             <TabPane
               tab="Cápitulos"
@@ -95,46 +121,50 @@ const App = () => {
               disabled={Object.keys(current_book).length === 0 ? true : false}
             >
               Capitulos
-              <Row justify="center">
-                <Col span="24" style={{ marginBottom: "200px" }}>
-                  <List
-                    bordered
-                    dataSource={chapters.length ? chapters : []}
-                    renderItem={(item) => (
-                      <List.Item style={{ padding: 0 }}>
-                        <Button
-                          type="primary"
-                          block
-                          onClick={() => handleChapter(item)}
-                        >
-                          {item}
-                        </Button>
-                      </List.Item>
-                    )}
-                  />
-                </Col>
-              </Row>
+              <Card style={{ height: 1300 }} loading={load}>
+                <Row justify="center">
+                  <Col span="24" style={{ marginBottom: "200px" }}>
+                    <List
+                      bordered
+                      dataSource={chapters.length ? chapters : []}
+                      renderItem={(item) => (
+                        <List.Item style={{ padding: 0 }}>
+                          <Button
+                            type="primary"
+                            block
+                            onClick={() => handleChapter(item)}
+                          >
+                            {item}
+                          </Button>
+                        </List.Item>
+                      )}
+                    />
+                  </Col>
+                </Row>
+              </Card>
             </TabPane>
             <TabPane tab="Versiculos" key="3" disabled={current_chapter === 0}>
               <b>
                 Livro de {current_book.name} - Cáp. {current_chapter} -
                 Versiculos
               </b>
-              <Row justify="center">
-                <Col span="24" style={{ marginBottom: "200px" }}>
-                  <List
-                    bordered
-                    dataSource={verses.length ? verses : []}
-                    renderItem={(item) => (
-                      <List.Item>
-                        <p>
-                          <b>{item.number}</b> - {item.text}
-                        </p>
-                      </List.Item>
-                    )}
-                  />
-                </Col>
-              </Row>
+              <Card style={{ height: 1300 }} loading={load}>
+                <Row justify="center">
+                  <Col span="24" style={{ marginBottom: "200px" }}>
+                    <List
+                      bordered
+                      dataSource={verses.length ? verses : []}
+                      renderItem={(item) => (
+                        <List.Item>
+                          <p>
+                            <b>{item.number}</b> - {item.text}
+                          </p>
+                        </List.Item>
+                      )}
+                    />
+                  </Col>
+                </Row>
+              </Card>
             </TabPane>
           </Tabs>
         </Col>
