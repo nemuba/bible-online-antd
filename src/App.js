@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Tabs, Row, Col, Menu, List, Button, Card } from 'antd';
-import Loading from 'react-page-loading';
 import { useDispatch, useSelector } from 'react-redux';
 import {fetchBooks} from './features/books/actions';
 import {set_current_book} from './features/current_book';
 import {set_current_chapter} from './features/current_chapter';
+import {fetchVerse} from './features/current_verse/actions';
 import { fetch_verses } from "./features/verses";
 import {fetchVerses} from './features/verses/actions';
 import {BookTwoTone} from '@ant-design/icons';
@@ -17,6 +17,7 @@ const App = () => {
   const livros = useSelector(state => state.books);
   const current_book = useSelector(state=> state.current_book);
   const current_chapter = useSelector(state=> state.current_chapter);
+  const current_verse = useSelector(state => state.current_verse);
   const verses = useSelector(state => state.verses);
 
   const [chapters,setChapters] = useState([]);
@@ -66,6 +67,11 @@ const App = () => {
 
   const handleVerse = (book, chapter) =>{
     dispatch(fetchVerses(book,chapter));
+  }
+
+  const handleCurrentVerse = (book, chapter, verse) =>{
+    dispatch(fetchVerse(book, chapter, verse));
+    setKey('4');
   }
 
   useEffect(()=>{
@@ -155,7 +161,7 @@ const App = () => {
                       bordered
                       dataSource={verses.length ? verses : []}
                       renderItem={(item) => (
-                        <List.Item>
+                        <List.Item onClick={() => handleCurrentVerse(current_book, current_chapter, item.number)}>
                           <p>
                             <b>{item.number}</b> - {item.text}
                           </p>
@@ -165,6 +171,16 @@ const App = () => {
                   </Col>
                 </Row>
               </Card>
+            </TabPane>
+            <TabPane
+              tab="Lendo"
+              key="4"
+              disabled={Object.keys(current_verse).length === 0 ? true : false}
+            >
+              <p>
+                {current_book.name} - {current_chapter} - {current_verse.number}
+              </p>
+              {current_verse.text}
             </TabPane>
           </Tabs>
         </Col>

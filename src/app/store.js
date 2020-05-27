@@ -4,6 +4,7 @@ import bookReducer from './../features/books';
 import currentBookReducer from './../features/current_book';
 import currentChapterReducer from './../features/current_chapter';
 import verseReducer from './../features/verses';
+import currentVerseReducer from './../features/current_verse';
 
 export default configureStore({
   reducer: {
@@ -11,6 +12,7 @@ export default configureStore({
     books: bookReducer,
     current_book: currentBookReducer,
     current_chapter: currentChapterReducer,
+    current_verse: currentVerseReducer,
     verses: verseReducer
   },
 });
