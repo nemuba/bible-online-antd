@@ -180,7 +180,9 @@ const App = () => {
               <p>
                 {current_book.name} - {current_chapter} - {current_verse.number}
               </p>
-              {current_verse.text}
+              <Card style={{ height: 1300 }} loading={load}>
+                {current_verse.text}
+              </Card>
             </TabPane>
           </Tabs>
         </Col>
